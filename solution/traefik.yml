@@ -1,9 +1,13 @@
 ## traefik.yml
 
+entryPoints:
+  polls:
+   address: ":80"
+
 # Docker configuration backend
 providers:
   docker:
-    defaultRule: "Host(`{{ trimPrefix `/` .Name }}.docker.localhost`)"
+    exposedByDefault: False
 
 # API and dashboard configuration
 api:

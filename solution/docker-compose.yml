@@ -6,39 +6,45 @@ services:
         dockerfile: dockerfile
     volumes:
       - ./app:/code/app
-    ports:
-        - 8008:8008
+    expose:
+        - 8000
     depends_on:
         - "postgres"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.polls.rule=path(`django.localhost`)"
     environment:
         SECRET_KEY: ${SECRET_KEY:-sh82G-2L4Eq3-23w4T5-O5y64}
         POSTGRES_DB: "pollsdb"
         POSTGRES_USER: "pollsuser"
         POSTGRES_PASSWORD: "pgpwd4polls"
-        DATABASE_URL: postgresql://shopuser:pgpwd4shop@postgres:5432/shopdb
     command: >
         sh -c "./wait-for-it.sh -t 0 postgres:5432 -- echo 'postgresql is up'
-        && python app/manage.py runserver"
+        && python app/manage.py runserver 0.0.0.0:8000"
+
+
+
   postgres:
     image: postgres:14.2
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
     environment:
         POSTGRES_DB: "pollsdb"
         POSTGRES_USER: "pollsuser"
         POSTGRES_PASSWORD: "pgpwd4polls"
         PGDATA: "/var/lib/postgresql/data/pgdata"
+
+
+
   balancer:
     image: traefik:2.7
     command: --api.insecure=true --providers.docker
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik.yml:/etc/traefik/traefik.yml
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
-      - "8080:8080"
-      - "80:80"
-  whoami:
-    # A container that exposes an API to show its IP address
-    image: traefik/whoami
-    deploy:
-      replicas: 2
-    labels:
-      - "traefik.http.routers.whoami.rule=Host(`whoami.docker.localhost`)"
+      - 8008:80
+      - 8081:8080
 
+volumes:
+  postgres_data:
