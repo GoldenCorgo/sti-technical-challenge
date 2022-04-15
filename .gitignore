@@ -1,3 +1,7 @@
 *.log
 challenge/.vagrant/
 solution/.vagrant/
+solution/venv
+__pycache__
+db.sqlite3
+solution/app/.DS_Store
