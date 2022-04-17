@@ -3,26 +3,23 @@ services:
   polls:
     build:
         context: ./app
-        dockerfile: dockerfile
+        dockerfile: dockerfile 
     volumes:
-      - ./app:/code/app
-    expose:
-        - 8000
+      - ./app:/app
     depends_on:
         - "postgres"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.polls.rule=path(`django.localhost`)"
+      - "traefik.http.routers.polls.rule=Host(`test.localhost`)"
+      - "traefik.http.services.polls-service.loadbalancer.server.port=8000"
     environment:
         SECRET_KEY: ${SECRET_KEY:-sh82G-2L4Eq3-23w4T5-O5y64}
         POSTGRES_DB: "pollsdb"
         POSTGRES_USER: "pollsuser"
         POSTGRES_PASSWORD: "pgpwd4polls"
     command: >
-        sh -c "./wait-for-it.sh -t 0 postgres:5432 -- echo 'postgresql is up'
-        && python app/manage.py runserver 0.0.0.0:8000"
-
-
+        bash -c "./wait-for-it.sh -t 0 postgres:5432 -- echo 'postgres is up'
+        && gunicorn --bind 0.0.0.0:8000 app.wsgi;"
 
   postgres:
     image: postgres:14.2
@@ -33,7 +30,7 @@ services:
         POSTGRES_USER: "pollsuser"
         POSTGRES_PASSWORD: "pgpwd4polls"
         PGDATA: "/var/lib/postgresql/data/pgdata"
-
+      
 
 
   balancer:
@@ -43,7 +40,7 @@ services:
       - ./traefik.yml:/etc/traefik/traefik.yml
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
-      - 8008:80
+      - 80:80
       - 8081:8080
 
 volumes:
