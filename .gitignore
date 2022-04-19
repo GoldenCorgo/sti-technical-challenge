@@ -4,5 +4,5 @@ solution/.vagrant/
 solution/venv
 __pycache__
 db.sqlite3
-solution/app/.DS_Store
 migrations
+.DS_Store
