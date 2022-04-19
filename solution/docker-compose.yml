@@ -2,34 +2,34 @@ version: "3"
 services:
   polls:
     build:
-        context: ./app
-        dockerfile: dockerfile 
-    volumes:
+      context: ./app
+      dockerfile: dockerfile
+    volumes: ### for development purpose
       - ./app:/app
     depends_on:
-        - "postgres"
+      - "postgres"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.polls.rule=Host(`test.localhost`)"
       - "traefik.http.services.polls-service.loadbalancer.server.port=8000"
     environment:
         SECRET_KEY: ${SECRET_KEY:-sh82G-2L4Eq3-23w4T5-O5y64}
-        POSTGRES_DB: "pollsdb"
-        POSTGRES_USER: "pollsuser"
-        POSTGRES_PASSWORD: "pgpwd4polls"
+        POSTGRES_DB: ${POSTGRES_DB:-pollsdb)
+        POSTGRES_USER: ${POSTGRES_USER:-pollsuser)
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pgpwd4polls)
     command: >
-        bash -c "./wait-for-it.sh -t 0 postgres:5432 -- echo 'postgres is up'
-        && gunicorn --bind 0.0.0.0:8000 app.wsgi;"
+      bash -c "./wait-for-it.sh -t 0 postgres:5432 -- echo 'postgres is up'
+      && python manage.py runserver 0.0.0.0:8000"
 
   postgres:
     image: postgres:14.2
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
-        POSTGRES_DB: "pollsdb"
-        POSTGRES_USER: "pollsuser"
-        POSTGRES_PASSWORD: "pgpwd4polls"
-        PGDATA: "/var/lib/postgresql/data/pgdata"
+      POSTGRES_DB: ${POSTGRES_DB:-pollsdb)
+      POSTGRES_USER: ${POSTGRES_USER:-pollsuser)
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pgpwd4polls)
+      PGDATA: "/var/lib/postgresql/data/pgdata"
       
 
 
