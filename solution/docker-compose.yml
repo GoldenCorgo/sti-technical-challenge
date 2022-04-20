@@ -7,10 +7,10 @@ services:
     volumes: ### for development purpose
       - ./app:/app ### enabling hot reload for running container
     depends_on:
-      - "postgres" ### makes shure to run container if database container is running
+      - "postgres" ### makes sure to run container if database container is running
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.polls.rule=Host(`test.localhost`)"
+      - "traefik.http.routers.polls.rule=Host(`localhost`)"
       - "traefik.http.services.polls-service.loadbalancer.server.port=8000"
     environment:
         SECRET_KEY: ${SECRET_KEY:-sh82G-2L4Eq3-23w4T5-O5y64}
